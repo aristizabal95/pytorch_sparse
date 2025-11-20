@@ -30,52 +30,59 @@ Note that only `value` comes with autograd support, as `index` is discrete and t
 
 ## Installation
 
-### Anaconda
-
-**Update:** You can now install `pytorch-sparse` via [Anaconda](https://anaconda.org/pyg/pytorch-sparse) for all major OS/PyTorch/CUDA combinations 🤗
-Given that you have [`pytorch >= 1.8.0` installed](https://pytorch.org/get-started/locally/), simply run
-
-```
-conda install pytorch-sparse -c pyg
-```
-
 ### Binaries
 
-We alternatively provide pip wheels for all major OS/PyTorch/CUDA combinations, see [here](https://data.pyg.org/whl).
+We provide pip wheels for all major OS/PyTorch/CUDA combinations, see [here](https://data.pyg.org/whl).
 
-#### PyTorch 2.5
+#### PyTorch 2.8
 
-To install the binaries for PyTorch 2.5.0, simply run
+To install the binaries for PyTorch 2.8.0, simply run
 
 ```
-pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.5.0+${CUDA}.html
+pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.8.0+${CUDA}.html
 ```
 
-where `${CUDA}` should be replaced by either `cpu`, `cu118`, `cu121`, or `cu124` depending on your PyTorch installation.
+where `${CUDA}` should be replaced by either `cpu`, `cu126`, `cu128`, or `cu129` depending on your PyTorch installation.
 
-|             | `cpu` | `cu118` | `cu121` | `cu124` |
+|             | `cpu` | `cu126` | `cu128` | `cu129` |
 |-------------|-------|---------|---------|---------|
 | **Linux**   | ✅    | ✅      | ✅      | ✅      |
 | **Windows** | ✅    | ✅      | ✅      | ✅      |
 | **macOS**   | ✅    |         |         |         |
 
-#### PyTorch 2.4
+#### PyTorch 2.7
 
-To install the binaries for PyTorch 2.4.0, simply run
+To install the binaries for PyTorch 2.7.0, simply run
 
 ```
-pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.4.0+${CUDA}.html
+pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.7.0+${CUDA}.html
 ```
 
-where `${CUDA}` should be replaced by either `cpu`, `cu118`, `cu121`, or `cu124` depending on your PyTorch installation.
+where `${CUDA}` should be replaced by either `cpu`, `cu118`, `cu126`, or `cu128` depending on your PyTorch installation.
 
-|             | `cpu` | `cu118` | `cu121` | `cu124` |
+|             | `cpu` | `cu118` | `cu126` | `cu128` |
 |-------------|-------|---------|---------|---------|
 | **Linux**   | ✅    | ✅      | ✅      | ✅      |
 | **Windows** | ✅    | ✅      | ✅      | ✅      |
 | **macOS**   | ✅    |         |         |         |
 
-**Note:** Binaries of older versions are also provided for PyTorch 1.4.0, PyTorch 1.5.0, PyTorch 1.6.0, PyTorch 1.7.0/1.7.1, PyTorch 1.8.0/1.8.1, PyTorch 1.9.0, PyTorch 1.10.0/1.10.1/1.10.2, PyTorch 1.11.0, PyTorch 1.12.0/1.12.1, PyTorch 1.13.0/1.13.1, PyTorch 2.0.0/2.0.1, PyTorch 2.1.0/2.1.1/2.1.2, PyTorch 2.2.0/2.2.1/2.2.2, and PyTorch 2.3.0/2.3.1 (following the same procedure).
+#### PyTorch 2.6
+
+To install the binaries for PyTorch 2.6.0, simply run
+
+```
+pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.6.0+${CUDA}.html
+```
+
+where `${CUDA}` should be replaced by either `cpu`, `cu118`, `cu124`, or `cu126` depending on your PyTorch installation.
+
+|             | `cpu` | `cu118` | `cu124` | `cu126` |
+|-------------|-------|---------|---------|---------|
+| **Linux**   | ✅    | ✅      | ✅      | ✅      |
+| **Windows** | ✅    | ✅      | ✅      | ✅      |
+| **macOS**   | ✅    |         |         |         |
+
+**Note:** Binaries of older versions are also provided for PyTorch 1.4.0, PyTorch 1.5.0, PyTorch 1.6.0, PyTorch 1.7.0/1.7.1, PyTorch 1.8.0/1.8.1, PyTorch 1.9.0, PyTorch 1.10.0/1.10.1/1.10.2, PyTorch 1.11.0, PyTorch 1.12.0/1.12.1, PyTorch 1.13.0/1.13.1, PyTorch 2.0.0/2.0.1, PyTorch 2.1.0/2.1.1/2.1.2, PyTorch 2.2.0/2.2.1/2.2.2, PyTorch 2.3.0/2.3.1, PyTorch 2.4.0/2.4.1, and PyTorch 2.5.0/2.5.1 (following the same procedure).
 For older versions, you need to explicitly specify the latest supported version number or install via `pip install --no-index` in order to prevent a manual installation from source.
 You can look up the latest supported version number [here](https://data.pyg.org/whl).
 
@@ -303,7 +310,7 @@ pytest
 ## C++ API
 
 `torch-sparse` also offers a C++ API that contains C++ equivalent of python models.
-For this, we need to add `TorchLib` to the `-DCMAKE_PREFIX_PATH` (*e.g.*, it may exists in `{CONDA}/lib/python{X.X}/site-packages/torch` if installed via `conda`):
+For this, we need to add `TorchLib` to the `-DCMAKE_PREFIX_PATH` (run `import torch; print(torch.utils.cmake_prefix_path)` to obtain it).
 
 ```
 mkdir build

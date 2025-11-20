@@ -2,6 +2,10 @@ name: Building Wheels
 
 on: [workflow_dispatch]
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
 
   wheel:
@@ -10,38 +14,61 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, macos-14, windows-2019]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
-        torch-version: [2.5.0]  # [2.3.0, 2.4.0, 2.5.0]
-        cuda-version: ['cpu', 'cu118', 'cu121', 'cu124']
+        os: [ubuntu-22.04, macos-14, windows-2022, ubuntu-22.04-arm]
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        torch-version: [2.8.0]
+        cuda-version: ['cpu', 'cu118', 'cu124', 'cu126', 'cu128', 'cu129']
         exclude:
-          - torch-version: 2.5.0
-            python-version: '3.8'
-          - torch-version: 2.3.0
+          - torch-version: 2.6.0
+            cuda-version: 'cu128'
+          - torch-version: 2.6.0
+            cuda-version: 'cu129'
+          - torch-version: 2.7.0
+            cuda-version: 'cu124'
+          - torch-version: 2.7.0
+            cuda-version: 'cu129'
+          - torch-version: 2.8.0
+            cuda-version: 'cu118'
+          - torch-version: 2.8.0
             cuda-version: 'cu124'
           - os: macos-14
             cuda-version: 'cu118'
           - os: macos-14
-            cuda-version: 'cu121'
-          - os: macos-14
             cuda-version: 'cu124'
+          - os: macos-14
+            cuda-version: 'cu126'
+          - os: macos-14
+            cuda-version: 'cu128'
+          - os: macos-14
+            cuda-version: 'cu129'
+          - os: ubuntu-22.04-arm
+            cuda-version: 'cu118'
+          - os: ubuntu-22.04-arm
+            cuda-version: 'cu124'
+          - os: ubuntu-22.04-arm
+            cuda-version: 'cu126'
+          - os: ubuntu-22.04-arm
+            cuda-version: 'cu128'
+          - os: ubuntu-22.04-arm
+            cuda-version: 'cu129'
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Upgrade pip
         run: |
           pip install --upgrade setuptools
+          pip install wheel
 
       - name: Install scipy
-        if: ${{ (matrix.python-version == '3.8') || (matrix.python-version == '3.9') }}
+        if: ${{ matrix.python-version == '3.9' }}
         run: |
           pip install scipy==1.10.1
 
@@ -69,8 +96,6 @@ jobs:
           echo "New version name: $VERSION+$TORCH_VERSION$CUDA_VERSION"
           sed -i "s/$VERSION/$VERSION+$TORCH_VERSION$CUDA_VERSION/" setup.py
           sed -i "s/$VERSION/$VERSION+$TORCH_VERSION$CUDA_VERSION/" torch_sparse/__init__.py
-        shell:
-          bash
 
       - name: Install torch-scatter
         run: |
@@ -80,35 +105,30 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: |
           bash .github/workflows/metis.sh
+          echo WITH_METIS=1 >> $GITHUB_ENV
 
       - name: Install METIS on Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
-          bash .github/workflows/metis-${{ runner.os }}.sh
+          # bash .github/workflows/metis-${{ runner.os }}.sh
+          echo WITH_METIS=0 >> $GITHUB_ENV
 
-      - name: Install main package for CPU
+      - name: Build wheel for CPU
         if: ${{ matrix.cuda-version == 'cpu' }}
         run: |
-          FORCE_ONLY_CPU=1 WITH_METIS=1 python setup.py develop
-        shell:
-          bash
+          python setup.py bdist_wheel --dist-dir=dist
+        env:
+          FORCE_ONLY_CPU: 1
+          WITH_METIS: ${{ env.WITH_METIS }}
 
-      - name: Install main package for GPU
+      - name: Build wheel for GPU
         if: ${{ matrix.cuda-version != 'cpu' }}
         run: |
           source .github/workflows/cuda/${{ matrix.cuda-version }}-${{ runner.os }}-env.sh
-          WITH_METIS=1 python setup.py develop
-        shell:
-          bash
-
-      - name: Test installation
-        run: |
-          python -c "import torch_sparse; print('torch-sparse:', torch_sparse.__version__)"
-
-      - name: Build wheel
-        run: |
-          pip install wheel
           python setup.py bdist_wheel --dist-dir=dist
+        env:
+          FORCE_CUDA: 1
+          WITH_METIS: ${{ env.WITH_METIS }}
 
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v1
